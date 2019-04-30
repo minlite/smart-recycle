@@ -28,7 +28,7 @@ def request_from_server(img):
     :returns: Returns a dictionary containing label and cofidence.
     """
     # URL or PUBLIC DNS to your server
-    URL = "http://ec2-18-237-108-254.us-west-2.compute.amazonaws.com:8080/predict"
+    URL = "http://ec2-54-203-6-178.us-west-2.compute.amazonaws.com:8080/predict"
 
     # File name so that it can be temporarily stored.
     temp_image_name = 'temp.jpg'
@@ -79,10 +79,9 @@ def main():
         # Get image array from frame
         
         image = frame.array
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("a"): 
-            image_crop = gray[80:400, 145:465]
+            image_crop = image[80:400, 145:465]
             image_crop = cv2.resize(image_crop,(224,224))
             
             print('Let\'s see what lego this is...')
@@ -99,7 +98,7 @@ def main():
 	    cv2.waitKey()
         
         # show the frame
-        cv2.imshow("Frame", gray)
+        cv2.imshow("Frame", image)
         key = cv2.waitKey(1) & 0xFF
 
         # clear the stream in preparation for the next frame
