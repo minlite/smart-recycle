@@ -28,7 +28,7 @@ def request_from_server(img):
     :returns: Returns a dictionary containing label and cofidence.
     """
     # URL or PUBLIC DNS to your server
-    URL = "http://ec2-54-71-200-251.us-west-2.compute.amazonaws.com:8080/predict"
+    URL = "http://ec2-18-237-108-254.us-west-2.compute.amazonaws.com:8080/predict"
 
     # File name so that it can be temporarily stored.
     temp_image_name = 'temp.jpg'
@@ -56,7 +56,7 @@ def request_from_server(img):
 def main():
     # 1. Start running the camera.
     # TODO: Initialize face detector
-    face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
+    #face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
     # Initialize camera and update parameters
     camera = PiCamera()
     width = 640
@@ -77,8 +77,6 @@ def main():
                     use_video_port=True):
 
         # Get image array from frame
-        frame = frame.array
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         image = frame.array
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -96,8 +94,8 @@ def main():
 
 	    result_to_display = label
 
-	    cv2.putText(frame, str(result_to_display + ", conf: " + str(confidence)), (10, 30), FONT, 1, (0, 255, 0), 2)
-	    cv2.imshow('Lego Classification', frame)
+	    cv2.putText(image_crop, str(result_to_display + ", conf: " + str(confidence)), (10, 30), FONT, 1, (0, 255, 0), 2)
+	    cv2.imshow('Lego Classification', image_crop)
 	    cv2.waitKey()
         
         # show the frame
