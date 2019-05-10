@@ -52,7 +52,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         #print(str(x),str(y),str(w),str(h))
         #cv2.imshow("image", gray)
         #compression.push_back(100)
-        cv2.imwrite("2x1 - " + str(i) + ".jpg", image_crop)
+        cv2.imwrite("actually 1x1 - " + str(i) + ".jpg", image_crop)
         i = i+1
         print(str(i))
     # show the frame
