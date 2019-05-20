@@ -39,7 +39,7 @@ def classify(path_to_image):
     img_height, img_width, num_channel = 224, 224, 3
 
     # Used for VGG16 to normalize the images
-    mean_pixel = np.array([104., 117., 123.]).reshape((1, 1, 3))
+    # mean_pixel = np.array([104., 117., 123.]).reshape((1, 1, 3))
 
     # TODO: Use opencv to read and resize image to standard dimensions
     img =  cv2.imread(path_to_image,0)

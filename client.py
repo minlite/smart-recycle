@@ -19,9 +19,6 @@ from picamera.array import PiRGBArray
 # Font that will be written on the image
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
-# TODO: Declare path to face cascade
-CASCADE_PATH = "/home/pi/opencv-2.4.13.4/data/haarcascades/haarcascade_frontalface_default.xml"
-
 
 def request_from_server(img):
     """
@@ -82,55 +79,37 @@ def main():
         # Get image array from frame
         frame = frame.array
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # TODO: Use face detector to get faces.
-        # Be sure to save the faces in a variable called 'faces'
-	faces = face_cascade.detectMultiScale(img,1.3,5)
-
-        for (x, y, w, h) in faces:
-            print('==================================')
-            print('Face detected!')
-            cv2.imshow('Face Image for Classification', frame)
-	    image_crop = img[y:(y+h), x:(x+w)]
+        
+        image = frame.array
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("a"): 
+            image_crop = gray[80:400, 145:465]
             image_crop = cv2.resize(image_crop,(224,224))
+            
+            print('Let\'s see what lego this is...')
 
-            # Keep showing image until a key is pressed
-            cv2.waitKey()
-            answer = input('Confirm image (1-yes / 0-no): ')
-            print('==================================')
+	    prediction = request_from_server(image_crop)
+	    confidence = prediction["confidence"]
+	    label = prediction["label"]
+	    print('New result found!')
 
-            if(answer == 1):
-                print('Let\'s see who you are...')
+	    result_to_display = label
 
-                # TODO: Get label and confidence using request_from_server
-		prediction = request_from_server(image_crop)
-                confidence = prediction["confidence"]
-		label = prediction["label"]
-                print('New result found!')
+	    cv2.putText(frame, str(result_to_display + ", conf: " + str(confidence)), (10, 30), FONT, 1, (0, 255, 0), 2)
+	    cv2.imshow('Lego Classification', frame)
+	    cv2.waitKey()
+        
+        # show the frame
+        cv2.imshow("Frame", gray)
+        key = cv2.waitKey(1) & 0xFF
 
-                # TODO: Display label on face image
-                # Save what you want to write on image to 'result_to_display'
-                # [OPTIONAL]: At this point you only have a number to display,
-                # you could add some extra code to convert your number to a
-                # name
-                if int(label)==17:
-			result_to_display = 'Hello Miro!'	
-                elif int(label)== 18:
-			result_to_display = 'Hello Adam!'
-                else:
-			result_to_display = label
-		
-
-                cv2.putText(frame, str(result_to_display + ", conf: " + str(confidence)), (10, 30), FONT, 1, (0, 255, 0), 2)
-                cv2.imshow('Face Image for Classification', frame)
-                cv2.waitKey()
-                break
-
-        # Delete image in variable so we can get the next frame
+        # clear the stream in preparation for the next frame
         rawCapture.truncate(0)
 
-        print('Waiting for image...')
-        time.sleep(1)
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break       
 
 
 # Runs main if this file is run directly
