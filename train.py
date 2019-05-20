@@ -25,9 +25,9 @@ IMG_H, IMG_W, NUM_CHANNELS = 224, 224, 3
 #MEAN_PIXEL = np.array([104., 117., 123.]).reshape((1, 1, 3))
 TRAIN_DIR = './data/Train'  # TODO
 VAL_DIR = './dataValidation'  # TODO
-NUM_EPOCHS = 7  # TODO
+NUM_EPOCHS = 7
 BATCH_SIZE = 16
-NUM_CLASSES = 2  # TODO
+NUM_CLASSES = 4
 
 
 def load_model():
@@ -41,7 +41,7 @@ def load_model():
     x = Flatten()(base_out)
     x = Dense(256, activation='relu')(x)
     x = Dropout(.5)(x)
-    
+
     # TODO: and another dense layer for output. The final layer should have the same number of units as classes
     predictions = Dense(NUM_CLASSES, activation='softmax')(x)
 
