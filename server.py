@@ -25,7 +25,8 @@ app = Flask(__name__)
 CORS(app)                               # Allow CORS (Cross Origin Requests)
 
 # TODO: Load the model from the weights file.
-MODEL = load_model('./vgg16_new_version_weights.h5')
+# MODEL = load_model('./vgg16_new_version_weights.h5')
+MODEL = load_model('./inception_weights.h5')
 
 
 def classify(path_to_image):
@@ -42,12 +43,12 @@ def classify(path_to_image):
     # mean_pixel = np.array([104., 117., 123.]).reshape((1, 1, 3))
 
     # TODO: Use opencv to read and resize image to standard dimensions
-    img =  cv2.imread(path_to_image,0)
+    img =  cv2.imread(path_to_image,1)
     resized_img = cv2.resize(img,(img_height,img_width))
 
     # TODO: Subtract mean_pixel from the image store the new image in
     # a variable called 'normalized_image'
-    normalized_image =  resize_img - mean_pixel
+    normalized_image =  resized_img 
 
     # Turns image shape of (2,) to (1,2)
     image_to_be_classified = np.expand_dims(normalized_image, axis=0)
@@ -64,11 +65,15 @@ def classify(path_to_image):
     # Hint: np.argmax
     label = np.argmax(predictions)
 
+    print(label)
+    print(predictions)
+
+
     # TODO: Calculate confidence according to the following metric:
     # Confidence = prediction_value / sum(all_prediction_values)
     # Be sure to call your confidence value 'conf'
     # Hint: np.sum()
-    label_value = predictions[label]
+    label_value = predictions[0][label]
     total =  np.sum(predictions)
     conf =  label_value/total
 
