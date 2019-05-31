@@ -37,7 +37,7 @@ def classify(path_to_image):
     """
 
     # Image dimensions that the model expects
-    img_height, img_width, num_channel = 224, 224, 3
+    img_height, img_width, num_channel = 299, 299, 3
 
     # Used for VGG16 to normalize the images
     # mean_pixel = np.array([104., 117., 123.]).reshape((1, 1, 3))

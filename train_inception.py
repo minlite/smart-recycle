@@ -16,14 +16,14 @@ from keras import optimizers
 from keras.layers import Dropout, Flatten, Dense
 from keras.utils.np_utils import to_categorical
 from keras.optimizers import SGD
+from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import glob
 import os
 import cv2
 import random
 
-IMG_H, IMG_W, NUM_CHANNELS = 224, 224, 3
-#IMG_H, IMG_W, NUM_CHANNELS = 299, 299, 3
+IMG_H, IMG_W, NUM_CHANNELS = 299, 299, 3
 #MEAN_PIXEL = np.array([104., 117., 123.]).reshape((1, 1, 3))
 TRAIN_DIR = './rgb_data/Train'  # TODO
 VAL_DIR = './rgb_data/Validation'  # TODO
@@ -34,8 +34,7 @@ NUM_CLASSES = 2
 
 def load_model():
     # TODO: use VGG16 to load lower layers of vgg16 network and declare it as base_model
-    base_model = VGG16(include_top=False,weights = 'imagenet',input_shape = (IMG_H, IMG_W, NUM_CHANNELS))
-#    base_model = InceptionV3(include_top=False, weights='imagenet', classes=NUM_CLASSES)
+    base_model = InceptionV3(include_top=False, weights='imagenet', input_shape = (IMG_H, IMG_W, NUM_CHANNELS), classes=NUM_CLASSES)
     # TODO: use 'imagenet' for weights, include_top=False, (IMG_H, IMG_W, NUM_CHANNELS) for input_shape
 
     print('Model weights loaded.')
@@ -96,10 +95,26 @@ def main():
     X_train, Y_train = load_data(TRAIN_DIR)
     print 'Load val data:'
     X_val, Y_val = load_data(VAL_DIR)
+
+    datagen = ImageDataGenerator(
+        featurewise_center=True,
+        featurewise_std_normalization=True,
+        rotation_range=20,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        horizontal_flip=True)
+
+# compute quantities required for featurewise normalization
+# (std, mean, and principal components if ZCA whitening is applied)
+    datagen.fit(X_train)
+
+    # fits the model on batches with real-time data augmentation:
+    model.fit_generator(datagen.flow(X_train, Y_train, batch_size=BATCH_SIZE),
+                    steps_per_epoch=len(X_train) / 32, epochs=NUM_EPOCHS)
     # TODO: Train model
-    model.fit(x=X_train, y=Y_train, batch_size=BATCH_SIZE, epochs=NUM_EPOCHS, validation_data=(X_val,Y_val))
+    #model.fit(x=X_train, y=Y_train, batch_size=BATCH_SIZE, epochs=NUM_EPOCHS, validation_data=(X_val,Y_val))
     # TODO: Save model weights
-    model.save('./vgg16_new_version_weights.h5')
+    model.save('./inception_weights.h5')
     print 'model weights saved.'
     return
 
