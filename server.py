@@ -25,8 +25,8 @@ app = Flask(__name__)
 CORS(app)                               # Allow CORS (Cross Origin Requests)
 
 # TODO: Load the model from the weights file.
-# MODEL = load_model('./vgg16_new_version_weights.h5')
-MODEL = load_model('./inception_weights.h5')
+MODEL = load_model('./vgg16_new_version_weights.h5')
+#MODEL = load_model('./inception_weights.h5')
 
 
 def classify(path_to_image):
@@ -37,7 +37,8 @@ def classify(path_to_image):
     """
 
     # Image dimensions that the model expects
-    img_height, img_width, num_channel = 299, 299, 3
+    #img_height, img_width, num_channel = 299, 299, 3
+    img_height, img_width, num_channel = 224, 224, 3
 
     # Used for VGG16 to normalize the images
     # mean_pixel = np.array([104., 117., 123.]).reshape((1, 1, 3))
