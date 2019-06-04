@@ -81,7 +81,7 @@ def main():
         image = frame.array
         key = cv2.waitKey(1) & 0xFF
         if key == ord("a"): 
-            image_crop = image[80:400, 145:465]
+            image_crop = image[130:420, 145:465]
             image_crop = cv2.resize(image_crop,(224,224))
             
             print('Let\'s see what lego this is...')

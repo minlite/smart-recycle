@@ -8,15 +8,26 @@ import busio
 import adafruit_vl53l0x
 import RPi.GPIO as GPIO
 import sys
+import pigpio
+import atexit
 from PIL import Image
 
 # Font that will be written on the image
 CONV_STEP = 12
 CONV_DIR = 16
-CONV_FREQ = 700
-CONV_DC = 1
+CONV_FREQ = 600
+CONV_DC = 10000
 
 SERVO_1 = 17
+SERVO_2 = 27
+SERVO_3 = 6
+SERVO_4 = 13
+
+def run_belt(pi):
+    pi.hardware_PWM(CONV_STEP, CONV_FREQ, CONV_DC)
+
+def stop_belt(pi):
+    pi.hardware_PWM(CONV_STEP, 0, 0)
 
 def request_from_server(img):
     """
@@ -26,7 +37,7 @@ def request_from_server(img):
     :returns: Returns a dictionary containing label and cofidence.
     """
     # URL or PUBLIC DNS to your server
-    URL = "http://ec2-54-203-6-178.us-west-2.compute.amazonaws.com:8080/predict"
+    URL = "http://ec2-34-208-201-143.us-west-2.compute.amazonaws.com:8080/predict"
 
     # File name so that it can be temporarily stored.
     temp_image_name = 'temp.jpg'
@@ -50,11 +61,15 @@ def request_from_server(img):
 
     return prediction
 
+def cleanup():
+    stop_belt(pi)
+
 def main():
     # 1. Start running the camera.
     # TODO: Initialize face detector
     #face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
     # Initialize camera and update parameters
+    global pi
     camera = PiCamera()
     width = 640
     height = 480
@@ -71,22 +86,49 @@ def main():
     sensor = adafruit_vl53l0x.VL53L0X(i2c)
 
     # Setup Conveyor Stepper
-    GPIO.setup(CONV_STEP, GPIO.OUT)
-    GPIO.setup(CONV_DIR, GPIO.OUT)
+    #GPIO.setup(CONV_STEP, GPIO.OUT)
+    #GPIO.setup(CONV_DIR, GPIO.OUT)
 
-    GPIO.output(CONV_DIR, 0)
+    #GPIO.output(CONV_DIR, 0)
 
-    p = GPIO.PWM(CONV_STEP, CONV_FREQ)
+    #p = GPIO.PWM(CONV_STEP, CONV_FREQ)
+
+    pi = pigpio.pi()
 
     # Setup Servos
     GPIO.setup(SERVO_1, GPIO.OUT)
     p_serv_1 = GPIO.PWM(SERVO_1, 30)
     p_serv_1.start(0)
-    p_serv_1.ChangeDutyCycle(3)
+    p_serv_1.ChangeDutyCycle(3.4)
+    time.sleep(1)
+    #p_serv_1.stop()
 
+
+    GPIO.setup(SERVO_2, GPIO.OUT)
+    p_serv_2 = GPIO.PWM(SERVO_2, 30)
+    p_serv_2.start(0)
+    p_serv_2.ChangeDutyCycle(7)
+    time.sleep(1)
+
+    GPIO.setup(SERVO_3, GPIO.OUT)
+    p_serv_3 = GPIO.PWM(SERVO_3, 30)
+    p_serv_3.start(0)
+    p_serv_3.ChangeDutyCycle(1.5)
+    time.sleep(1)
+    
+    GPIO.setup(SERVO_4, GPIO.OUT)
+    p_serv_4 = GPIO.PWM(SERVO_4, 30)
+    p_serv_4.start(0)
+    p_serv_4.ChangeDutyCycle(4.5)
+    time.sleep(1)
+
+    atexit.register(cleanup)
+
+    #p_serv_2.stop()
     #make motor spin
-    p.start(0)
-    p.ChangeDutyCycle(CONV_DC)
+    #p.start(0)
+    #p.ChangeDutyCycle(CONV_DC)
+    run_belt(pi)
 
     while True:
         mm_range = sensor.range
@@ -95,7 +137,8 @@ def main():
         if mm_range < 110:
             # CLASSIFY OBJECT
             print("Object DETECTED!")
-            p.stop()
+            #p.stop()
+            stop_belt(pi)
 
     # 2. Detect a face, display it, and get confirmation from user.
    # for frame in camera.capture_continuous(
@@ -115,20 +158,74 @@ def main():
             prediction = request_from_server(pil_image)
             confidence = prediction["confidence"]
             label = prediction["label"]
+            #label = 0
+            #confidence = 1
             print('LABEL is: {}, confidence = {}'.format(label, confidence))
 
             result_to_display = label
 
             pil_image.show(command='fim')
 
-            p.start(0)
-            p.ChangeDutyCycle(CONV_DC)
+            #p.start(0)
+            #p.ChangeDutyCycle(CONV_DC)
+            #p_serv_1.start(0)
+            if int(label)==0:
+                p_serv_1.start(0)
+                #time.sleep(0.5)
+                p_serv_1.ChangeDutyCycle(5.5)
+                #time.sleep(0.5)
+                #p_serv_1.stop()
+                #p_serv_1.start(0)
 
-            while True:
-                time.sleep(0.1)
+                #p.start(0)
+                #p.ChangeDutyCycle(CONV_DC)
+                run_belt(pi)
+                time.sleep(5.5)
+                p_serv_1.ChangeDutyCycle(3)
+            elif int(label)==1:
+                time.sleep(0.5)
+                p_serv_2.ChangeDutyCycle(5.2)
+                time.sleep(0.5)
+                #p_serv_1.stop()
+                #p_serv_1.start(0)
+
+                #p.start(0)
+                #p.ChangeDutyCycle(CONV_DC)
+                run_belt(pi)
+                time.sleep(6)
+                p_serv_2.ChangeDutyCycle(7)
+
+            elif int(label)==2:
+                time.sleep(0.5)
+                p_serv_3.ChangeDutyCycle(3.5)
+                time.sleep(0.5)
+                #p_serv_1.stop()
+                #p_serv_1.start(0)
+
+                #p.start(0)
+                #p.ChangeDutyCycle(CONV_DC)
+                run_belt(pi)
+                time.sleep(7)
+                p_serv_3.ChangeDutyCycle(1.5)
+            elif int(label)==3:
+                time.sleep(0.5)
+                p_serv_4.ChangeDutyCycle(2.5)
+                time.sleep(0.5)
+                #p_serv_1.stop()
+                #p_serv_1.start(0)
+
+                #p.start(0)
+                #p.ChangeDutyCycle(CONV_DC)
+                run_belt(pi)
+                time.sleep(7.5)
+                p_serv_4.ChangeDutyCycle(4.5)
+            
+            #while True:
+            
+            #time.sleep(5)
 
 
-            return
+            #return
         
         # clear the stream in preparation for the next frame
         rawCapture.truncate(0)
